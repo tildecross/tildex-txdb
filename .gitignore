@@ -1,0 +1,6 @@
+__pycache__/
+NOTES
+txdb.mongodb.conf
+txdb.mysql.conf
+archive/
+env/
