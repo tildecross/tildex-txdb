@@ -23,14 +23,15 @@ def jdecode(data):
 @app.route("/")
 def index():
     title = "Tildex :: Database"
-    return render_template("index.html", title=title, service="TxDB")
+    service = "TxDB v{}".format(app.config["VERSION"])
+    return render_template("index.html", title=title, service=service)
 
 @app.route("/api/v1", methods=["GET"])
 def welcome():
     return jsonify({
         "name": "welcome-message",
         "data": {
-            "message": "Welcome to TxDB!",
+            "message": "Welcome to TxDB v{}".format(app.config["VERSION"]),
             "method": request.method
         }
     })
@@ -121,8 +122,10 @@ def post_storage():
             result["name"] = "error"
             result["data"] = "no storage unit was specified"
     
-    database = TxDBCore("standard")
-    # print(database)
+    database = TxDBCore("standard", modifier=True, plugins=[
+        "standard", "structured", "organized"
+    ])
+    print(database)
     
     return jsonify({ "name": "storage", "data": result })
     

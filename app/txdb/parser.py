@@ -1,5 +1,6 @@
 import json
 import core
+from app.txdb.plugins import *
 
 # NOTE: Replace self.valid checks and return False with exceptions
 
@@ -15,9 +16,6 @@ class TxDBParser:
     
     def _decode(self, data):
         return json.loads(data)
-    
-    def operation(self, jOp):
-        pass
     
     def operation(self, jOp):
         pass

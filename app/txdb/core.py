@@ -1,47 +1,36 @@
-# TODO: Use 
+from app.txdb.plugins import *
 
 class TxDBCore:
     def __init__(self, *args, **kwargs):
-        _type = args[0]
-        if not (_type == "standard" 
-             or _type == "structured" 
-             or _type == "organized"):
-            _type = "standard"
+        modifier = kwargs.get("modifier", None)
+        plugins = kwargs.get("plugins", [])
         
-        headers = kwargs.get("headers", [])
-        state = kwargs.get("state", [])
-        unique = kwargs.get("unique", False)
+        self.plugins = self._load_plugins(plugins)
+        self.modifier = modifier
+        self.type = args[0]
         
-        self.meta = {
-            "standard": {
-                "type": _type,
-                "unique": unique
-            },
-            "structured": {
-                "type": _type,
-                "headers": headers
-            },
-            "organized": {
-                "type": _type,
-                "state": state
-            }
-        }.get(_type)
-        
-        
-        
-        self.db = [
-            {"_meta": self.meta},
-            list()
-        ]
+        if self.type in self.plugins:
+            self.model = self.plugins[self.type](self.modifier)
+            self.db = self.model.db
+        else:
+            print("Error! :(")
         
     def __repr__(self):
-        return "<TxDBCore %s>" % self.db[0]["_meta"]["type"]
+        return "<TxDBCore {}>".format(self.db[0]["_meta"]["type"])
+    
+    def _load_plugins(self, plugins):
+        _plugins = {}
+        for plugin in plugins:
+            pname = "{}{}".format(plugin[0].upper(), plugin[1:])
+            if pname in globals():
+                _plugins[plugin] = globals()[pname]
+        return _plugins
         
     def load(self, database):
         pass
     
     def parse(self):
-        pass
+        return self.model.parse()
         
     def dispatch(self, instructions):
         op, index, data = instructions
@@ -62,17 +51,13 @@ class TxDBCore:
         }
         
     def _add(self, data):
-        # TODO: Add conditions for non-standard schemas
-        pass
+        return self.model.add(data)
     
     def _rem(self, index):
-        # TODO: Add conditions for non-standard schemas
-        pass
+        return self.model.rem(index)
     
     def _get(self, index, data):
-        # TODO: Add conditions for non-standard schemas
-        pass
+        return self.model.get(index, data)
     
     def _set(self, index, data):
-        # TODO: Add conditions for non-standard schemas
-        pass
+        return self.model.set(index, data)
