@@ -1,8 +1,5 @@
 import json
-import core
-from app.txdb.plugins import *
-
-# NOTE: Replace self.valid checks and return False with exceptions
+from app.txdb.core import TxDBCore
 
 class TxDBParser:
     def __init__(self, db):

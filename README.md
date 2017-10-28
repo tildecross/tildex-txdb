@@ -45,5 +45,12 @@ Changelog
     * Has foundation of TxDB packages functionality started
     * Basic infrastructure of databases put into place
     * Future goals to aim for established
+* v0.0.2
+    * Deprecated txdb.parser in favor of plugins
+    * txdb.plugins, starting with standard, structured, and organized
+    * Minimal model for txdb.plugins.standard
+    * Renamed app/views.py to app/routes.py
+    * Removed app/models.py
 
+------
 &copy; Copyright 2017, Tildecross under [the 3-Clause BSD License](LICENSE).

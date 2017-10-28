@@ -27,7 +27,7 @@ class TxDBCore:
         return _plugins
         
     def load(self, database):
-        pass
+        self.model.load(database)
     
     def parse(self):
         return self.model.parse()
@@ -36,11 +36,11 @@ class TxDBCore:
         op, index, data = instructions
         
         run = {
-            "add": lambda i, d: _add(d),
-            "rem": lambda i, d: _rem(i),
-            "set": lambda i, d: _set(i, d),
-            "get": lambda i, d: _get(i, d),
-            "___": lambda i, d: _err("Operation does not exist")
+            "add": lambda i, d: self._add(d),
+            "rem": lambda i, d: self._rem(i),
+            "set": lambda i, d: self._set(i, d),
+            "get": lambda i, d: self._get(i, d),
+            "___": lambda i, d: self._err("Operation does not exist")
         }.get(op, "___")
         
         return run(index, data)

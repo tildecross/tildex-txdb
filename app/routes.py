@@ -78,6 +78,9 @@ def post_storage():
             item = storage.find_one({"api_key": api_key,
                                      "service": service["name"],
                                      "name": _name})
+            database = TxDBCore("standard", modifier=True, plugins=[
+                "standard", "structured", "organized"
+            ])
             
             if item:
                 service_name = item["service"]
@@ -86,18 +89,13 @@ def post_storage():
                 
                 store_name = "{}_{}".format(service_name, _name)
                 store = mongo.db[store_name]
-                if _data:
-                    jdata = jdecode(_data)
-                    jdata["ref"] = math.floor(time.time() * 10**6)
-                    store.insert(jdata)
                 
-                entries = []
-                for entry in store.find():
-                    entry.pop("_id", None)
-                    entries.append(entry)
+                database.load(store)
+                if _data:
+                    database.dispatch(("add", None, _data))
                     
                 result["name"] = item["name"]
-                result["data"] = entries
+                result["data"] = database.parse()
             else:
                 if _data:
                     service_name = item["service"]
@@ -111,21 +109,17 @@ def post_storage():
                                     "name": _name})
                                     
                     store = mongo.db[store_name]
-                    store.insert(jdecode(_data))
+                    database.load(store)
+                    database.dispatch(("add", None, _data))
                     
                     result["name"] = item["name"]
-                    result["data"] = store.find()
+                    result["data"] = database.parse()
                 else:
                     result["name"] = "error"
                     result["data"] = "need data to initialize storage"
         else:
             result["name"] = "error"
             result["data"] = "no storage unit was specified"
-    
-    database = TxDBCore("standard", modifier=True, plugins=[
-        "standard", "structured", "organized"
-    ])
-    print(database)
     
     return jsonify({ "name": "storage", "data": result })
     
