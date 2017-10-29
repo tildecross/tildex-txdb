@@ -51,6 +51,8 @@ Changelog
     * Minimal model for txdb.plugins.standard
     * Renamed app/views.py to app/routes.py
     * Removed app/models.py
+* v0.0.3
+    * Implemented all txdb operations into routes
 
 ------
 &copy; Copyright 2017, Tildecross under [the 3-Clause BSD License](LICENSE).

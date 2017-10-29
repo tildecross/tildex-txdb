@@ -12,12 +12,16 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/txdb")
 from app.txdb.parser import TxDBParser
 from app.txdb.core import TxDBCore
 
+database = TxDBCore("standard", modifier=True, plugins=[
+    "standard", "structured", "organized"
+])
+
 # type: obj -> str
-def jencode(data):
+def encode(data):
     return json.dumps(data)
 
 # type: str -> obj
-def jdecode(data):
+def decode(data):
     return json.loads(data)
 
 @app.route("/")
@@ -78,9 +82,6 @@ def post_storage():
             item = storage.find_one({"api_key": api_key,
                                      "service": service["name"],
                                      "name": _name})
-            database = TxDBCore("standard", modifier=True, plugins=[
-                "standard", "structured", "organized"
-            ])
             
             if item:
                 service_name = item["service"]
@@ -92,10 +93,14 @@ def post_storage():
                 
                 database.load(store)
                 if _data:
-                    database.dispatch(("add", None, _data))
+                    _instructions = decode(_data)
+                    iop = _instructions.get("op", None)
+                    iindex = _instructions.get("index", None)
+                    idata = _instructions.get("data", None)
+                    instructions = (iop, iindex, idata)
                     
                 result["name"] = item["name"]
-                result["data"] = database.parse()
+                result["data"] = database.dispatch(instructions)
             else:
                 if _data:
                     service_name = item["service"]
@@ -110,10 +115,15 @@ def post_storage():
                                     
                     store = mongo.db[store_name]
                     database.load(store)
-                    database.dispatch(("add", None, _data))
+                    
+                    _instructions = decode(_data)
+                    iop = _instructions.get("op", None)
+                    iindex = _instructions.get("index", None)
+                    idata = _instructions.get("data", None)
+                    instructions = (iop, iindex, idata)
                     
                     result["name"] = item["name"]
-                    result["data"] = database.parse()
+                    result["data"] = database.dispatch(instructions)
                 else:
                     result["name"] = "error"
                     result["data"] = "need data to initialize storage"

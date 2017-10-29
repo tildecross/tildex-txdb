@@ -34,13 +34,17 @@ class Standard:
         self.db[1] = self.store
     
     def parse(self, query=None):
-        entries = []
-        database = self.store.find() if query is None else query
-        for entry in database:
-            entry.pop("_id", None)
-            entries.append(entry)
-        return entries
-        
+        if query is None:
+            entries = []
+            database = self.store.find()
+            for entry in database:
+                entry.pop("_id", None)
+                entries.append(entry)
+            return entries
+        else:
+            del query["_id"]
+            return query
+            
     # type: obj -> str
     def _encode(self, data):
         return json.dumps(data)
@@ -53,26 +57,21 @@ class Standard:
         if self.store is None:
             return None
         
-        # data is JSON string, jdata is object
-        jdata = self._decode(data)
-        _data = deepcopy(jdata)
-        jdata["ref"] = math.floor(time() * 10**6)
+        _data = deepcopy(data)
+        data["ref"] = math.floor(time() * 10**6)
         
         if self.modifier["data"]:
-            # NOTE: ref will cause jdata to always be different
+            # NOTE: ref will cause data to always be different
             if self.store.find_one(_data) is None:
-                self.store.insert_one(jdata)
+                self.store.insert_one(data)
         else:
-            self.store.insert_one(jdata)
+            self.store.insert_one(data)
             
         return self.parse()
     
     def rem(self, index):
         if self.store is None:
             return None
-        
-        if index > len(self.store.find()):
-            return self.parse()
         
         self.store.find_one_and_delete({"ref": index})
         return self.parse()
@@ -82,25 +81,19 @@ class Standard:
         if self.store is None:
             return None
         
-        # data is JSON string, jdata is object
-        jdata = self._decode(data)
+        if index:
+            return self.parse(query=self.store.find_one({"ref": index}))
         
-        if index > len(self.db[1]):
-            return None
+        if data:
+            return self.parse(query=self.store.find_one(data))
         
-        return self.parse(self.store.find_one(jdata))
+        return self.parse()
     
     def set(self, index, data):
         if self.store is None:
             return None
         
-        # data is JSON string, jdata is object
-        jdata = self._decode(data)
-        
-        if index > len(self.store.find()):
-            return self.parse()
-        
-        self.store.find_one_and_replace({"ref": index}, {
+        self.store.find_one_and_update({"ref": index}, {
             "$set": data
         })
         return self.parse()
