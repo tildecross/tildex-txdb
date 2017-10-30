@@ -34,7 +34,8 @@ $ cp txdb.default.conf txdb.mongodb.conf
 ```
 
 At this point you will need to provide the connection details for mongodb in 
-`txdb.mongodb.conf`
+`txdb.mongodb.conf`. Also, provide an app key to limit only allow authorized 
+users to creating services in TxDB (this feature may be deprecated later).
 
 Changelog
 ---------
@@ -53,6 +54,10 @@ Changelog
     * Removed app/models.py
 * v0.0.3
     * Implemented all txdb operations into routes
+* v0.1.0
+    * Added service creation
+    * Implemented usage metrics
+    * Fixed some bugs and inconsistencies
 
 ------
 &copy; Copyright 2017, Tildecross under [the 3-Clause BSD License](LICENSE).

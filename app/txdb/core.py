@@ -12,6 +12,7 @@ class TxDBCore:
         if self.type in self.plugins:
             self.model = self.plugins[self.type](self.modifier)
             self.db = self.model.db
+            self.cost = self.model.cost
         else:
             print("Error! :(")
         

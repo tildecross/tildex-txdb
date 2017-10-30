@@ -4,11 +4,12 @@ from time import time
 from copy import deepcopy
 
 class Standard:
-    def __init__(self, modifier):
+    def __init__(self, modifier, cost=1):
         self.type = "standard"
         self.modifier = ("unique", modifier)
         self.modifier = {"name": "unique", "data": modifier}
         self.store = None
+        self.cost = cost
         
         self.meta = {}
         self.meta["type"] = self.type
@@ -55,45 +56,77 @@ class Standard:
     
     def add(self, data):
         if self.store is None:
-            return None
+            return None, 0
+        
+        if not data:
+            return None, 0
         
         _data = deepcopy(data)
-        data["ref"] = math.floor(time() * 10**6)
+        data["ref"] = str(math.floor(time() * 10**6))
+        usage = 0
         
         if self.modifier["data"]:
             # NOTE: ref will cause data to always be different
             if self.store.find_one(_data) is None:
+                usage = len(self._encode(data))
                 self.store.insert_one(data)
+            else:
+                # NOTE: No punishment for non-unique entries
+                usage = -self.cost
         else:
+            usage = len(self._encode(data))
             self.store.insert_one(data)
-            
-        return self.parse()
+        
+        return self.parse(), usage + self.cost
     
     def rem(self, index):
         if self.store is None:
-            return None
+            return None, 0
+        
+        if not index:
+            return None, 0
+        
+        usage = 0
+        search = self.store.find_one({"ref": index})
+        if search:
+            usage = -1 * len(self._encode(self.parse(query=search)))
         
         self.store.find_one_and_delete({"ref": index})
-        return self.parse()
+        return self.parse(), usage + self.cost
     
     # TODO: Add filtering using data<?>
     def get(self, index, data):
         if self.store is None:
-            return None
+            return None, 0
+        
+        if not (index or data):
+            return None, 0
+        
+        if index and data:
+            query = self.store.find_one({"ref": index}, projection=data)
+            search = self.parse(query=query)
+            return search, self.cost
         
         if index:
-            return self.parse(query=self.store.find_one({"ref": index}))
+            search = self.parse(query=self.store.find_one({"ref": index}))
+            return search, self.cost
         
         if data:
-            return self.parse(query=self.store.find_one(data))
+            search = self.parse(query=self.store.find_one(data))
+            return search, self.cost
         
-        return self.parse()
+        return self.parse(), self.cost
     
     def set(self, index, data):
         if self.store is None:
-            return None
+            return None, 0
+        
+        if not (index and data):
+            return None, 0
+        
+        usage = len(self._encode(data))
         
         self.store.find_one_and_update({"ref": index}, {
             "$set": data
         })
-        return self.parse()
+        return self.parse(), usage + self.cost

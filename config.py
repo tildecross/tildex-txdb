@@ -13,4 +13,5 @@ MONGO_URI = "mongodb://{}:{}@{}:{}/{}".format(
     config.get("DB", "port"),
     config.get("DB", "db"))
 MONGO_DBNAME = config.get("DB", "db")
-VERSION = "0.0.3"
+APP_KEY = config.get("APP", "key")
+VERSION = "0.1.0"
