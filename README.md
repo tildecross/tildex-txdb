@@ -3,7 +3,7 @@ Tildex :: TxDB
 
 Version: **TxDB v0.0.1**
 
-*Currently under development, has not yet MVP specs*
+*Currently under development, has not yet reached MVP specs*
 
 This project is meant to be fill the role of something similar to Google's 
 Firebase. TxDB itself will be an interface to access and manipulate a database 
